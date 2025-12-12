@@ -28,10 +28,14 @@ def _pick_binary(cfg):
     env_bin = os.environ.get("NVBANDWIDTH_BIN")
     if env_bin and shutil.which(env_bin) or (env_bin and os.path.exists(env_bin)):
         return env_bin
-    # 3) common relative path used in your example
+    # 3) home directory (where setup.sh installs it)
+    home_path = os.path.expanduser("~/nvbandwidth/nvbandwidth")
+    if os.path.exists(home_path):
+        return home_path
+    # 4) common relative path used in your example
     if os.path.exists("nvbandwidth/nvbandwidth"):
         return "nvbandwidth/nvbandwidth"
-    # 4) PATH
+    # 5) PATH
     if shutil.which("nvbandwidth"):
         return "nvbandwidth"
     return None

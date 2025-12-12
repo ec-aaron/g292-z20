@@ -1,8 +1,8 @@
 # tests/test_nics.py
 """
-Detect exactly two *physical* Mellanox ConnectX-5 cards, and warn if:
-  - a card exposes multiple PCI functions (e.g., .0 and .1 -> dual-port/personality)
-  - any of the functions report as Infiniband (0207) instead of Ethernet (0200)
+Detect exactly two *physical* Mellanox ConnectX-5 cards:
+  - One Infiniband controller (0207)
+  - One Ethernet controller (0200)
 
 We derive physical cards by collapsing BDF functions:
   01:00.0 and 01:00.1 -> one physical card at 01:00
@@ -97,14 +97,19 @@ def test_two_physical_connectx5_cards_and_warn_on_dual_port_or_ib():
             UserWarning,
         )
 
-    # Warn if any function is Infiniband rather than Ethernet
-    ib_cards = {base: info for base, info in cards.items()
-                if any("Infiniband controller" in c for c in info["classes"])}
-    if ib_cards:
-        warnings.warn(
-            "Some ConnectX-5 functions are Infiniband (class 0207). "
-            "If you expect Ethernet, adjust firmware/personality:\n"
-            + _format_cards(ib_cards),
-            UserWarning,
-        )
+    # Count Infiniband and Ethernet controllers
+    ib_cards = [base for base, info in cards.items()
+                if any("Infiniband controller" in c for c in info["classes"])]
+    eth_cards = [base for base, info in cards.items()
+                 if any("Ethernet controller" in c for c in info["classes"])]
+
+    # Assert exactly 1 Infiniband and 1 Ethernet
+    assert len(ib_cards) == 1, (
+        f"Expected exactly 1 Infiniband controller, found {len(ib_cards)}.\n"
+        f"Details:\n{_format_cards(cards)}\n\nRaw matches:\n" + "\n".join(lines)
+    )
+    assert len(eth_cards) == 1, (
+        f"Expected exactly 1 Ethernet controller, found {len(eth_cards)}.\n"
+        f"Details:\n{_format_cards(cards)}\n\nRaw matches:\n" + "\n".join(lines)
+    )
 

@@ -6,7 +6,23 @@ mem:
   speed_mhz: 2666      # minimum acceptable configured speed
   size_tolerance_gib: 0.5  # ± tolerance to allow for reporting quirks
 nvbandwidth:
-  bin: "/home/danucore/nvbandwidth/nvbandwidth"   # adjust if different
+  # bin path: setup.sh symlinks to /usr/local/bin/nvbandwidth (or use ~/nvbandwidth/build/nvbandwidth)
+  # bin: "/usr/local/bin/nvbandwidth"   # uncomment to override auto-detection
   min_h2d_gbps: 25.0                 # good floor for PCIe4 x16; raise if you want stricter
+
+# Disk/NVMe testing configuration
+disk:
+  # Set to false to enable write/verify tests (disabled by default for safety)
+  skip_write_test: true
+
+  # Size of test file in MB for fio write/verify test (default: 100)
+  # Larger values = longer test time but more thorough
+  # Each drive will have this much written + verified
+  write_test_size_mb: 100
+
+  # Auto-mount Lexar drives before testing (useful for CI/CD)
+  # WARNING: Will create ext4 filesystems on blank drives
+  auto_mount_for_testing: false
+
 gpus:
   expect_count: 8
